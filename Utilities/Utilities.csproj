@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>$(SolutionName)$(MSBuildProjectName)</AssemblyName>
+    <RootNamespace>$(SolutionName).$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+	  
+	<IsPackable>true</IsPackable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Main Artery Utilities</Title>
+    <Authors>$(SolutionName)</Authors>
+    <Company>$(SolutionName)</Company>
+    <PackageTags>Utilities;Extensions;</PackageTags>
+    <Description>C# language utilities and extensions.</Description>
+    <PackageId>$(SolutionName).$(MSBuildProjectName.Replace(" ", "_"))</PackageId>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+</Project>
