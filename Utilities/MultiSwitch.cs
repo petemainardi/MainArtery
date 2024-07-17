@@ -19,18 +19,22 @@ namespace MainArtery.Utilities
 
         public event Action<TState> StateChanged;
 
+
         public MultiSwitch(TState initialState)
         {
             _state = initialState;
         }
         public MultiSwitch() : this(default) { }
 
+
+        public ConditionSet StateConditions { get; } = new ConditionSet();
+
         public TState State
         {
             get => _state;
             set
             {
-                if (!Equals(_state, value))
+                if (!Equals(_state, value) && StateConditions.Fulfilled)
                 {
                     _state = value;
                     StateChanged?.Invoke(_state);
