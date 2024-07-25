@@ -63,6 +63,20 @@ namespace MainArtery.Utilities
             return result;
         }
 
+        /// <summary>
+        /// Preforms the specified action on each element of the collection.
+        /// </summary>
+        /// <typeparam name="T">The type of objects contained in the collection</typeparam>
+        /// <param name="collection">The collection being acted upon</param>
+        /// <param name="action">Procedure to perform on each element of the collection</param>
+        /// <returns>The modified collection</returns>
+        public static IEnumerable<T> ForEvery<T>(this IEnumerable<T> collection, Action<T> action)
+        {
+            for (int i = 0; i < collection.Count(); i++)
+                action(collection.ElementAt(i));
+
+            return collection;
+        }
     }
     /// ===========================================================================================
     /// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
