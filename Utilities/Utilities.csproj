@@ -20,7 +20,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/petemainardi/MainArtery</RepositoryUrl>
 
-	<Version>1.0.4</Version>
+	<Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

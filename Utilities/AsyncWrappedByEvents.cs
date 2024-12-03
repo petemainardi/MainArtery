@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +15,7 @@ namespace MainArtery.Utilities
     /// ===========================================================================================
     /// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     /// ===========================================================================================
-    public class AsyncWrappedByEvents
+    public sealed class AsyncWrappedByEvents : IDisposable
     {
         /// =======================================================================================
         /// Fields & Properties
@@ -44,12 +46,12 @@ namespace MainArtery.Utilities
         /// <summary>
         /// The time at which the process was last executed.
         /// </summary>
-        public DateTime LastStartTime { get; private set; }
+        public DateTime LastStartTime { get; private set; } = DateTime.MinValue;
 
         /// <summary>
         /// The time at which the process last finished execution.
         /// </summary>
-        public DateTime LastEndTime { get; private set; }
+        public DateTime LastEndTime { get; private set; } = DateTime.MinValue;
 
         /// <summary>
         /// Whether the last execution of the process successfully ran to completion.
@@ -117,6 +119,15 @@ namespace MainArtery.Utilities
         }
 
         /// =======================================================================================
+        /// IDisposable
+        /// =======================================================================================
+        public void Dispose()
+        {
+            if (IsRunning)
+                CancelProcess();
+        }
+
+        /// =======================================================================================
         /// Methods
         /// =======================================================================================
 
@@ -153,17 +164,23 @@ namespace MainArtery.Utilities
                 _wrapperTask = _process(sendProgress, _ctSource.Token);
                 await _wrapperTask.ConfigureAwait(true);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException e) // Process was canceled
             {
-                // Process was canceled
+                if (e.CancellationToken != _ctSource.Token)
+                    throw;
             }
             finally
             {
                 _ctSource.Dispose();
 
-                ProcessEnded.Invoke(_wrapperTask.Status == TaskStatus.RanToCompletion);
+                bool success = _wrapperTask != null && _wrapperTask.Status == TaskStatus.RanToCompletion;
+                if (callingContext == null)
+                    ProcessEnded.Invoke(success);
+                else
+                    callingContext.Post(delegate { ProcessEnded(success); }, null);
 
-                _wrapperTask.Dispose();
+                if (_wrapperTask != null && (_wrapperTask.IsCompleted || _wrapperTask.IsFaulted || _wrapperTask.IsCanceled))
+                    _wrapperTask.Dispose();
                 _wrapperTask = null;
             }
         }
@@ -175,6 +192,35 @@ namespace MainArtery.Utilities
         {
             if (IsRunning)
                 _ctSource.Cancel();
+        }
+
+        /// =======================================================================================
+        /// Static Methods
+        /// =======================================================================================
+        
+        /// <summary>
+        /// Execute provided callback after all given processed have finished running.
+        /// </summary>
+        /// <param name="processes">Processes to wait upon for completion</param>
+        /// <param name="callback">Function to execute when all processes have completed</param>
+        /// <param name="checkImmediatelyForCompletion">Whether to check for completion of all processes at the time this is called</param>
+        public static void WhenAllEnded(IEnumerable<AsyncWrappedByEvents> processes, Action callback, bool checkImmediatelyForCompletion = true)
+        {
+            for (int i = 0; i < processes.Count(); i++)
+                processes.ElementAt(i).ProcessEnded += CheckAllEnded;
+
+            if (checkImmediatelyForCompletion)
+                CheckAllEnded(true);
+
+            void CheckAllEnded(bool _)
+            {
+                if (processes.All(p => !p.IsRunning && p.LastEndTime > p.LastStartTime))
+                {
+                    for (int i = 0; i < processes.Count(); i++)
+                        processes.ElementAt(i).ProcessEnded -= CheckAllEnded;
+                    callback?.Invoke();
+                }
+            }
         }
         /// =======================================================================================
     }
