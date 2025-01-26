@@ -22,10 +22,10 @@ namespace MainArtery.Utilities
         /// <param name="collection">The collection being acted upon</param>
         /// <param name="rand">Randomizing agent</param>
         /// <returns>The index and element randomly selected from the collection</returns>
-        public static Tuple<int, T> Random<T>(this IEnumerable<T> collection, Random rand)
+        public static (int Index, T Element) Random<T>(this IEnumerable<T> collection, Random rand)
         {
             int i = rand.Next(0, collection.Count());
-            return new Tuple<int, T>(i, collection.ElementAt(i));
+            return (i, collection.ElementAt(i));
         }
 
         /// <summary>
