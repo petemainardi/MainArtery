@@ -77,6 +77,18 @@ namespace MainArtery.Utilities
 
             return collection;
         }
+
+        /// <summary>
+        /// Wrap the Linq Except method in params for more convenient use.
+        /// </summary>
+        /// <typeparam name="T">The type of objects contained in the collection</typeparam>
+        /// <param name="collection">The collection being acted upon</param>
+        /// <param name="elements">Objects to exclude from the returned collection</param>
+        /// <returns>A copy of the collection without the specified elements</returns>
+        public static IEnumerable<T> Except<T>(this IEnumerable<T> collection, params T[] elements)
+        {
+            return collection.Except(elements, EqualityComparer<T>.Default);
+        }
     }
     /// ===========================================================================================
     /// |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
