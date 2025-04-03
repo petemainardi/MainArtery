@@ -36,7 +36,7 @@ namespace MainArtery.Utilities
         }
 
         /// =======================================================================================
-        /// Fields & Properties
+        /// Fields
         /// =======================================================================================
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private readonly Task<IDisposable> _releaserTask;
@@ -54,6 +54,8 @@ namespace MainArtery.Utilities
         /// =======================================================================================
         /// Methods
         /// =======================================================================================
+        public bool IsLocked => _semaphore.CurrentCount == 0;
+
 		public IDisposable Lock()
         {
             _semaphore.Wait();
@@ -73,6 +75,7 @@ namespace MainArtery.Utilities
                     TaskScheduler.Default
                     );
         }
+
         /// =======================================================================================
 	}
     /// ===========================================================================================
