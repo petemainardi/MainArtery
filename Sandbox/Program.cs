@@ -1,5 +1,6 @@
 ﻿using MainArtery.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Description = System.ComponentModel.DescriptionAttribute;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace Sandbox
 {
@@ -21,8 +22,8 @@ namespace Sandbox
             toggle.Toggle();
             Assert.IsTrue(toggle.State);
 
-            ConditionSet conditions = new ConditionSet(() => true);
-            conditions.Add(() => toggle.State);
+            ConditionSet conditions = new ConditionSet([Description("Dummy: Always pass")]() => true);
+            conditions.Add([Description("State must be true")]() => toggle.State);
             toggle.StateConditions.Add(conditions);
 
             toggle.Toggle();
@@ -51,14 +52,6 @@ namespace Sandbox
             async Task Sleep5() => await SleepLog(5000);
             async Task Sleep7() => await SleepLog(7000);
 
-            //using (AwaitableEvent basicTest = new AwaitableEvent())
-            //{
-            //    _ = basicTest.AddNonSequentialListener(Sleep7);
-            //    _ = basicTest.AddSequentialListener(Sleep1);
-            //    _ = basicTest.AddSequentialListener(Sleep5);
-
-            //    await basicTest.Invoke();
-            //}
 
             AwaitableEvent concurrencyTest = new AwaitableEvent();
             _ = concurrencyTest.AddNonSequentialListener(Sleep7);
